@@ -50,6 +50,22 @@ const secretMenu = [
 
 app.use(express.json()); //app lvl middleware
 
+app.use((request, response, next) => {
+    const timeDate = new Date();
+    const capturedDateFromInput = timeDate.toISOString();
+
+    const methodFromInput = request.method;
+
+    const pathFromInput = request.path;
+
+    const logger = `[${capturedDateFromInput}] ${methodFromInput} ${pathFromInput}`;
+
+    console.log(logger);
+    
+    next();
+
+});
+
 const isChef = (request, response, next) => {
 /*
 we're creating the route level middleware which will server as a cridential
