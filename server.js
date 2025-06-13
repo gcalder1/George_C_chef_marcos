@@ -25,7 +25,7 @@ const menu = [
  }
 ];
 
-app.use(express.json());
+app.use(express.json()); //app lvl middleware
 
 app.get("/", function (request, response) {
 /*
@@ -41,8 +41,17 @@ from the DB (in this case our restuarant server)
 });
 
 app.get("/menu", function (request, response) {
+/*
+we're creating a GET route for the client to pull up the information
+about the menu items
+*/
     const searchPrice = request.query.maxPrice;
     const priceNumber = Number(searchPrice);
+    /*
+    however, instead of showing the menu, we will show certain menu items
+    based on the query made by the client, which we are grabbing the value
+    of and then turning it into a number since the value is a string
+    */
 
     if (!priceNumber) {
         return response.send(menu).end();
@@ -50,6 +59,13 @@ app.get("/menu", function (request, response) {
         let menuItemsBelowMyPrice = menu.filter(menuItem => menuItem.price <= priceNumber)
         return response.send(menuItemsBelowMyPrice).end();
     }
+    /*
+    to show the menu, we are using an error-first format to decide when not
+    to show the unfiltered menu vs when to show the menu items that comply
+    with the filter itself. Both are sent using the .send() method as json
+    objects, where the body of the response will be that filtered or unfiltered
+    menu
+    */
 
 });
 
@@ -77,13 +93,36 @@ specific food item from the array of objects
 });
 
 app.post("/reservations", function (request, response) {
+/*
+we're creating a post route to recieve reservation json data and then
+format the response to the client in a readable way
+*/
 
-    let reservation = request.body;
+    let reservationName = request.body.name;
+    let reservationDate = request.body.date;
+    let reservationTime = request.body.time;
+    /*
+    we are pointing to the different keys with the json data from the 
+    incoming json data (thanks to the app level middleware) so that we can
+    use that information to interpolate the values into a message via a
+    template literal
+    */
 
+    if (!reservationName || !reservationDate || !reservationTime) {
+        return response.status(400).send("Missing name, date or time").end();
+    } else {
+        return response.status(201).send(`${reservationName}, thank you
+            for reserving at Chef Marco's Restaurant on ${reservationDate}
+            at ${reservationTime}! Your reservation is confirmed`).end();
+    }
+    /*
+    if we miss any sort of info within the reservation, the response will
+    send 400 status code and a message that tells the user that they made a
+    bad request and why it was "bad". If not, then we "confirm" the 
+    reservation with the client via template literal of the data
+    */
 
-    
 });
-
 
 
 //setting up the port upon which our express app will listen to and show
