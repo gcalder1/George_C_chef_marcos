@@ -51,7 +51,15 @@ const secretMenu = [
 app.use(express.json()); //app lvl middleware
 
 app.use((request, response, next) => {
+/*
+this app level middleware captures and displays activity from the client
+into our terminal by recording the data in ISO format, which form of 
+communication was done via http methods, and which url path the client used
+for their request
+*/
+
     const timeDate = new Date();
+
     const capturedDateFromInput = timeDate.toISOString();
 
     const methodFromInput = request.method;
@@ -61,8 +69,14 @@ app.use((request, response, next) => {
     const logger = `[${capturedDateFromInput}] ${methodFromInput} ${pathFromInput}`;
 
     console.log(logger);
-    
+
     next();
+    /*
+    although we are not responding with anything, we need to make sure this
+    middleware allows the request to keep going through to other logic
+    or else we will be stuck in an infinitely loading request. We only
+    want to display this information on the terminal and that is it
+    */
 
 });
 
