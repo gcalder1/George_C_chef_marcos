@@ -25,7 +25,55 @@ const menu = [
  }
 ];
 
+const secretMenu = [
+{
+    id: 1,
+    dish: "Orc Finger Nachos",
+    price: 9
+},
+{
+    id: 2,
+    dish: "Phoenix Tears Risotto",
+    price: 15
+},
+{
+    id: 3,
+    dish: "Dragon's Onion Soup",
+    price: 12
+},
+{
+    id: 4,
+    dish: "The Forbidden Cheese Platter",
+    price: 20
+}
+]
+
 app.use(express.json()); //app lvl middleware
+
+const isChef = (request, response, next) => {
+/*
+we're creating the route level middleware which will server as a cridential
+check to see if the client has the role of "chef" to the access the reponse
+*/
+
+    if (request.headers.role !== "chef") {
+        return response.status(401).json({
+            error: 
+            "Your credentials as a chef are lacking. Please come back when you are a chef."
+        });
+    } else {
+        next();
+    }
+    /*
+    we're creating a "checkpoint" with this route level middleware which
+    will either create a response that is sent to the client if the client
+    does not have the role of chef within their header (before the request
+    even reaches the route logic). If the req does have the necessary 
+    credentials, then the user's request should continue on to the rest of 
+    the route's logic
+    */
+
+};
 
 app.get("/", function (request, response) {
 /*
@@ -123,6 +171,30 @@ format the response to the client in a readable way
     */
 
 });
+
+app.get("/chef/secret-recipe", isChef, function (request, response) {
+/*
+we use the isChef route middleware to verify the permissions of the client's
+ability to view the information
+*/
+    response.send({
+        recipe: "The secret recipe for foobar stew includes: A orc finger's nail, tears of a phoenix, 2 whole onions, the cheese.",
+        secretTip: "You can use the /chef/secret-recipe/secret-menu route to see our..unique.. items that contain our secret recipe items."
+    }).end();
+    /*
+    because they have the right role, therefore the right permissions, they
+    can view the secret recipe for foobar stew
+    */
+
+});
+
+app.get("/chef/secret-recipe/secret-menu", isChef, function (request, response){
+/*
+similarly, this route uses the same route middleware to reveal the secret menu
+which the client would only know about had they had access to the secret recipe
+*/
+    response.send(secretMenu).end();
+})
 
 
 //setting up the port upon which our express app will listen to and show
